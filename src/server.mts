@@ -1,35 +1,6 @@
 import {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
-
-/**
- * =========================
- *  Config & Environment
- * =========================
- */
-const FHIR_BASE_URL = process.env.FHIR_BASE_URL; // e.g., https://your-fhir.example.com/fhir
-const AUTH_TYPE = process.env.FHIR_AUTH_TYPE ?? "none"; // "none" | "bearer" | "basic"
-
-if (!FHIR_BASE_URL) {
-  console.error("Missing FHIR_BASE_URL");
-  process.exit(1);
-}
-
-function authHeaders(): Record<string, string> {
-  if (AUTH_TYPE === "bearer") {
-    const token = process.env.FHIR_BEARER_TOKEN;
-    if (!token) {
-      throw new Error("FHIR_BEARER_TOKEN required for bearer auth");
-    }
-    return {Authorization: `Bearer ${token}`};
-  }
-  if (AUTH_TYPE === "basic") {
-    const u = process.env.FHIR_BASIC_USER ?? "";
-    const p = process.env.FHIR_BASIC_PASS ?? "";
-    const b64 = Buffer.from(`${u}:${p}`).toString("base64");
-    return {Authorization: `Basic ${b64}`};
-  }
-  return {};
-}
+import {adminJwt, config} from "./config.mjs";
 
 /**
  * =========================
@@ -64,7 +35,7 @@ type FhirBundle = {
 const toIso = (v?: string) => (v ? new Date(v).toISOString() : undefined);
 
 function createHeaders(): Record<string, string> {
-  return {Accept: "application/fhir+json", ...authHeaders()};
+  return {Accept: "application/fhir+json", Authorization: `Bearer ${adminJwt.get()}`};
 }
 
 function buildObservationUrl(
@@ -220,7 +191,7 @@ Returns simplified observation data and raw FHIR Bundle.`,
       const {patientId, code, since, until, count = 100, maxItems = 200} = args;
 
       const headers = createHeaders();
-      const url = buildObservationUrl(FHIR_BASE_URL, {patientId, code, since, until, count});
+      const url = buildObservationUrl(config.fhirBaseUrl, {patientId, code, since, until, count});
       const {pages, items} = await collectObservations(url, headers, maxItems);
 
       const payload = {
