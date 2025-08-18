@@ -6,7 +6,6 @@ RUN npm ci
 
 COPY tsconfig.json ./
 COPY dist ./dist
-COPY src/jwt-private-key.pem ./
 
 ENV NODE_ENV=production
 ENV PORT=8080
