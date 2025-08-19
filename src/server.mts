@@ -45,7 +45,7 @@ function buildObservationUrl(
 ): string {
   const u = new URL(`${baseUrl}/Observation`);
   u.searchParams.set("patient", q.patientId);
-  u.searchParams.set("code", q.code);
+  u.searchParams.set("combo-code", q.code);
   if (q.count) {
     u.searchParams.set("_count", String(q.count));
   }
@@ -192,6 +192,7 @@ Returns simplified observation data and raw FHIR Bundle.`,
 
       const headers = createHeaders();
       const url = buildObservationUrl(config.fhirBaseUrl, {patientId, code, since, until, count});
+      console.log(`searching fhir: ${url}`);
       const {pages, items} = await collectObservations(url, headers, maxItems);
 
       const payload = {
