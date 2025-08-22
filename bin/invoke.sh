@@ -12,8 +12,8 @@ curl -i -X POST http://localhost:8070/mcp \
         "patientId":"test-patient-0001",
         "code":"40443-4",
         "since":"2025-07-01T00:00:00.000Z",
-        "count":1,
-        "maxItems":1
+        "count":10,
+        "maxItems":10
       }
     }
   }'
